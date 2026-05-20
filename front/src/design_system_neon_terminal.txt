@@ -1,0 +1,52 @@
+# DESIGN SYSTEM : NEON-TERMINAL (RETRO-FUTURE)
+===========================================
+
+## 1. VISION ET CONCEPT
+Le Design System "Neon-Terminal" est directement inspiré de l'esthétique "Hacker" et des interfaces de terminaux CRT.
+Il repose sur un contraste maximal entre des fonds très sombres et des éléments d'interface vibrants pour une immersion totale.
+
+## 2. PALETTE DE COULEURS (CODES HEX)
+-------------------------------------------
+### Couleurs d'Accentuation (Le "Signal")
+- Vert Fluo (Primary)    : #00FF41  -> Utilisé pour le texte critique, les curseurs et l'état actif.
+- Vert Émeraude (Secondary): #008F11  -> Utilisé pour les succès, les barres de progression et les icônes.
+
+### Couleurs de Structure (Le "Châssis")
+- Noir Profond (Base)     : #0D0208  -> Arrière-plan principal (fond d'écran).
+- Indigo Sombre (Surface) : #1A1B26  -> Couleur des cartes, des panneaux et des survols.
+- Gris Anthracite (Muted) : #2E2E2E  -> Bordures inactives et texte secondaire.
+
+## 3. TYPOGRAPHIE
+-------------------------------------------
+- Famille : Polices Monospace impératives (ex: 'JetBrains Mono', 'Fira Code', 'Courier New').
+- Style : Pas de lissage excessif (aspect pixelisé préféré).
+- Hiérarchie :
+  * H1 (Titre) : 24px, Bold, MAJUSCULES.
+  * Body (Corps) : 14px, Regular.
+  * Code/Meta : 12px, Regular, Gris Anthracite.
+
+## 4. COMPOSANTS D'INTERFACE
+-------------------------------------------
+### Boutons
+- Style : Bordure de 2px solide Vert Fluo, fond transparent.
+- État Hover : Fond rempli en Vert Fluo, texte en Noir Profond.
+- Coins : Angles droits (0px radius) pour renforcer l'aspect technique.
+
+### Champs de Saisie (Inputs)
+- Style : Fond Noir Profond, bordure basse (underline) Vert Émeraude.
+- Curseur : Bloc rectangulaire clignotant.
+
+### Conteneurs (Cards/Panels)
+- Bordure : 1px solide #008F11.
+- Effet : Glow subtil (box-shadow: 0 0 5px rgba(0, 255, 65, 0.3)).
+
+## 5. RÈGLES DE MISE EN PAGE
+-------------------------------------------
+- Grille : Utilisation d'un système de grille rigide (8px).
+- Espacement : Marges généreuses pour éviter l'encombrement visuel propre aux vieux terminaux.
+- Séparateurs : Utilisation de lignes de caractères ASCII (ex: "----------------").
+
+## 6. EFFETS VISUELS
+-------------------------------------------
+- Scanlines : Superposition d'une trame de lignes horizontales semi-transparentes.
+- Glitch : Animations rapides de décalage sur les survols d'éléments importants.

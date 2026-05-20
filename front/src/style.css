@@ -1,0 +1,88 @@
+@import "tailwindcss";
+
+@import "tailwindcss";
+
+@theme {
+    /* Colors - Resend Inspired (Temperate Dark) */
+    --color-primary: #ffffff;
+    --color-secondary: #a1a1aa;
+    /* text-zinc-400 */
+    --color-success: #10b981;
+    /* emerald-500 */
+    --color-error: #ef4444;
+    /* red-500 */
+
+    --color-background: #000000;
+    --color-surface: #09090b;
+    /* zinc-950 */
+    --color-surface-hover: #18181b;
+    /* zinc-900 */
+    --color-muted: #27272a;
+    /* zinc-800 */
+    --color-border: #27272a;
+    /* zinc-800 */
+
+    /* Typography */
+    --font-sans: 'Inter', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+    /* Radii */
+    --radius-base: 8px;
+
+    /* Custom Transitions */
+    --transition-standard: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@layer base {
+    body {
+        @apply bg-background text-white font-sans antialiased overflow-x-hidden;
+        background: radial-gradient(circle at 50% 0%, #061f18 0%, #000000 100%);
+    }
+
+    h1 {
+        @apply text-4xl font-bold tracking-tight mb-2;
+    }
+
+    h2 {
+        @apply text-3xl font-bold tracking-tight mb-2;
+    }
+
+    h3 {
+        @apply text-xl font-semibold tracking-tight;
+    }
+}
+
+@layer components {
+    .card-resend {
+        @apply bg-[#09090b]/80 backdrop-blur-sm border border-[#27272a] rounded-2xl p-6 shadow-[0_1px_3px_rgba(0, 0, 0, 0.5), 0_1px_2px_rgba(0, 0, 0, 0.06)] transition-standard hover:border-emerald-900/50;
+    }
+
+    .input-resend {
+        @apply bg-zinc-950/50 border border-zinc-800 text-white px-3 py-2 rounded-xl focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/10 focus:outline-none transition-standard placeholder:text-zinc-700 text-sm;
+    }
+
+    select.input-resend {
+        @apply appearance-none cursor-pointer pr-10;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%233f3f46' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+    }
+
+    select.input-resend option {
+        @apply bg-zinc-950 text-white;
+    }
+
+    .button-primary {
+        @apply bg-emerald-500/10 backdrop-blur-md border border-emerald-500/20 text-emerald-400 px-4 py-2 rounded-xl font-bold transition-standard hover:bg-emerald-500/20 hover:border-emerald-500/40 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(16, 185, 129, 0.05)];
+    }
+
+    .button-secondary {
+        @apply bg-zinc-900/50 backdrop-blur-sm text-white border border-zinc-800 px-4 py-2 rounded-xl font-medium transition-standard hover:bg-zinc-800 active:scale-[0.98] shadow-sm;
+    }
+}
+
+@layer utilities {
+    .glass-effect {
+        @apply backdrop-blur-md bg-zinc-900/40 border border-white/10;
+    }
+}
