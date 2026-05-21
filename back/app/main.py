@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database.database import engine, Base
-from app.routes import auth, vault, secret, tools
+from app.routes import auth, vault, secret, tools, security
 
 # Création des tables de la base de données
 Base.metadata.create_all(bind=engine)
@@ -27,6 +27,7 @@ app.include_router(auth.router)
 app.include_router(vault.router)
 app.include_router(secret.router)
 app.include_router(tools.router)
+app.include_router(security.router)
 
 @app.get("/")
 def root():

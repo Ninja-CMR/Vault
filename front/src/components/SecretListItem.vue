@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useSecretStore, type Secret } from '../stores/secret'
+import { useAuthStore } from '../stores/auth'
 
 const props = defineProps<{
   secret: Secret
@@ -12,8 +13,15 @@ const decryptedData = ref<any>(null)
 const isLoading = ref(false)
 const countdown = ref(15)
 let timer: any = null
+const emit = defineEmits(['request-master-key'])
 
+const authStore = useAuthStore()
 const handleReveal = async () => {
+  if (!authStore.masterKey) {
+    emit('request-master-key')
+    return
+  }
+  
   if (isRevealed.value) {
     hideSecret()
     return
@@ -24,8 +32,8 @@ const handleReveal = async () => {
     decryptedData.value = await secretStore.revealSecret(props.secret.id)
     isRevealed.value = true
     startTimer()
-  } catch (error) {
-    alert('Failed to reveal secret. Is your Master Key correct?')
+  } catch (error: any) {
+    alert(error.message || 'Échec de la révélation du secret.')
   } finally {
     isLoading.value = false
   }
@@ -62,7 +70,7 @@ const copyToClipboard = (text: string) => {
       <div class="flex items-center space-x-4">
         <div class="w-10 h-10 bg-zinc-900 rounded-lg flex items-center justify-center border border-zinc-800">
           <svg v-if="secret.type === 'LOGIN'" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-zinc-400 group-hover:text-emerald-500/50 transition-colors"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          <svg v-else-if="secret.type === 'API_KEY'" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-zinc-400 group-hover:text-emerald-500/50 transition-colors"><path d="m21 2-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3y-3z"/></svg>
+          <svg v-else-if="secret.type === 'API_KEY'" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-zinc-400 group-hover:text-emerald-500/50 transition-colors"><path d="m21 2-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3v-3z"/></svg>
           <svg v-else xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-zinc-400 group-hover:text-emerald-500/50 transition-colors"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
         </div>
         <div>

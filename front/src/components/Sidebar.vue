@@ -2,11 +2,9 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
-import { useSecretStore } from '../stores/secret'
 
 const route = useRoute()
 const authStore = useAuthStore()
-const secretStore = useSecretStore()
 
 const isTeamOpen = ref(false)
 const isUserOpen = ref(false)
@@ -121,13 +119,22 @@ const activePath = computed(() => route.path)
     <!-- Master Key Input -->
     <div class="px-6 py-2">
        <div class="relative group">
-          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-600 transition-colors group-focus-within:text-zinc-400"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3y-3z"/></svg>
-          <input 
-            v-model="secretStore.masterPassword"
-            type="password" 
-            placeholder="Master Key..."
-            class="w-full bg-zinc-900/50 border border-zinc-900 rounded-lg pl-8 pr-3 py-1.5 text-[11px] focus:outline-none focus:border-zinc-800 focus:bg-zinc-900 transition-all placeholder:text-zinc-700 font-medium"
-          />
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-600 transition-colors group-focus-within:text-zinc-400"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3v-3z"/></svg>
+          <div 
+            v-if="authStore.publicToken && authStore.publicToken !== 'VAT-PENDING-SYNC'"
+            class="w-full bg-zinc-900/30 border border-zinc-900/50 rounded-lg pl-8 pr-3 py-1.5 text-[10px] focus:outline-none transition-all placeholder:text-zinc-800 font-mono text-emerald-500/70 truncate flex items-center h-[30px]"
+            title="Votre Vault est déverrouillé"
+          >
+            {{ authStore.publicToken }}
+          </div>
+          <button 
+            v-else-if="authStore.publicToken === 'VAT-PENDING-SYNC' || (!authStore.masterKey && authStore.hasMasterKey)"
+            @click="authStore.publicToken === 'VAT-PENDING-SYNC' ? $router.push('/setup-master-key') : $emit('request-unlock')"
+            class="w-full bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/20 rounded-lg pl-8 pr-3 py-1.5 text-[10px] text-emerald-500 font-medium transition-all flex items-center h-[30px] group/btn"
+          >
+            <span>{{ authStore.publicToken === 'VAT-PENDING-SYNC' ? 'Fix Token Sync' : 'Unlock Vault' }}</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="ml-auto opacity-0 group-hover/btn:opacity-100 transition-all"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
        </div>
     </div>
 

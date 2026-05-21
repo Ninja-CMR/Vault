@@ -15,6 +15,11 @@ const router = createRouter({
             component: () => import('../views/LoginView.vue')
         },
         {
+            path: '/setup-master-key',
+            name: 'setup-master-key',
+            component: () => import('../views/MasterKeySetupView.vue')
+        },
+        {
             path: '/dashboard',
             component: () => import('../layouts/DashboardLayout.vue'),
             meta: { requiresAuth: true },
@@ -37,7 +42,7 @@ const router = createRouter({
                 {
                     path: 'generator',
                     name: 'generator',
-                    component: () => import('../views/DashboardHome.vue')
+                    component: () => import('../views/PasswordGeneratorView.vue')
                 },
                 {
                     path: 'logs',

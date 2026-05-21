@@ -1,10 +1,32 @@
 <script setup lang="ts">
+import { onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import Sidebar from '../components/Sidebar.vue'
+import MasterKeyRequiredModal from '../components/modals/MasterKeyRequiredModal.vue'
+import MasterKeyUnlockModal from '../components/modals/MasterKeyUnlockModal.vue'
 
 const authStore = useAuthStore()
 const router = useRouter()
+const isMasterKeyModalOpen = ref(false)
+const isUnlockModalOpen = ref(false)
+
+onMounted(async () => {
+    await authStore.checkMasterKeyStatus()
+    if (!authStore.hasMasterKey && router.currentRoute.value.path !== '/setup-master-key') {
+      isMasterKeyModalOpen.value = true
+    } else if (authStore.hasMasterKey && !authStore.masterKey) {
+      isUnlockModalOpen.value = true
+    }
+})
+
+// Watch for changes in master key status (e.g. after setup)
+watch(() => authStore.hasMasterKey, (newVal) => {
+  if (newVal) {
+    isMasterKeyModalOpen.value = false
+    if (!authStore.masterKey) isUnlockModalOpen.value = true
+  }
+})
 
 const logout = () => {
   authStore.logout()
@@ -15,7 +37,19 @@ const logout = () => {
 <template>
   <div class="min-h-screen bg-black flex text-white font-sans">
     <!-- Sidebar -->
-    <Sidebar @logout="logout" />
+    <Sidebar @logout="logout" @request-unlock="isUnlockModalOpen = true" />
+
+    <!-- Master Key Global Prompt -->
+    <MasterKeyRequiredModal
+      :show="isMasterKeyModalOpen"
+      @close="isMasterKeyModalOpen = false"
+    />
+
+    <MasterKeyUnlockModal
+      :show="isUnlockModalOpen"
+      @close="isUnlockModalOpen = false"
+      @unlocked="isUnlockModalOpen = false"
+    />
 
     <!-- Main Content Area -->
     <div class="flex-1 flex flex-col min-w-0 overflow-hidden">

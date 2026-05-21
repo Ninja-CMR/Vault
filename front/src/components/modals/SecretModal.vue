@@ -2,6 +2,7 @@
 import { ref, watch } from 'vue'
 import { useSecretStore } from '../../stores/secret'
 import { useVaultStore } from '../../stores/vault'
+import { useAuthStore } from '../../stores/auth'
 import { useDashboard } from '../../composables/useDashboard'
 
 const props = defineProps<{
@@ -13,6 +14,7 @@ const emit = defineEmits(['close', 'created'])
 
 const secretStore = useSecretStore()
 const vaultStore = useVaultStore()
+const authStore = useAuthStore()
 const { fetchDashboardData } = useDashboard()
 
 const title = ref('')
@@ -101,7 +103,7 @@ const handleSubmit = async () => {
           </div>
 
           <!-- Master Key Warning -->
-          <div v-if="!secretStore.masterPassword" class="p-3 rounded-lg bg-orange-500/10 border border-orange-500/20 flex items-center space-x-3">
+          <div v-if="!authStore.masterKey" class="p-3 rounded-lg bg-orange-500/10 border border-orange-500/20 flex items-center space-x-3">
              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-orange-500 shrink-0"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
              <p class="text-[12px] text-orange-200 font-medium leading-tight">
                Please set your <span class="text-white">Master Key</span> in the sidebar to secure this secret.
@@ -166,7 +168,7 @@ const handleSubmit = async () => {
               <button 
                 type="submit" 
                 class="button-primary w-full py-3 text-[14px] font-bold" 
-                :disabled="isSubmitting || !secretStore.masterPassword"
+                :disabled="isSubmitting || !authStore.masterKey"
               >
                 {{ isSubmitting ? 'Stashing...' : 'Add Secret' }}
               </button>

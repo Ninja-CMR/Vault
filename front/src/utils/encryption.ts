@@ -84,6 +84,6 @@ export async function decryptData(encryptedBase64: string, password: string, sal
 
         return decoder.decode(decrypted);
     } catch (e) {
-        throw new Error('Decryption failed. Check your master password.');
+        throw new Error('Déchiffrement échoué. Votre Master Key est peut-être incorrecte ou a été régénérée.');
     }
 }

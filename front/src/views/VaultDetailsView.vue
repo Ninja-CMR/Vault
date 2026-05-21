@@ -3,19 +3,23 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useVaultStore, type Vault } from '../stores/vault'
 import { useSecretStore } from '../stores/secret'
+import { useAuthStore } from '../stores/auth'
 import SecretListItem from '../components/SecretListItem.vue'
 import SecretModal from '../components/modals/SecretModal.vue'
+import MasterKeyRequiredModal from '../components/modals/MasterKeyRequiredModal.vue'
 
 const route = useRoute()
 const router = useRouter()
 const vaultStore = useVaultStore()
 const secretStore = useSecretStore()
+const authStore = useAuthStore()
 
 const vaultId = route.params.id as string
 const vault = ref<Vault | null>(null)
 const secrets = ref<any[]>([])
 const isLoading = ref(true)
 const isSecretModalOpen = ref(false)
+const isMasterKeyModalOpen = ref(false)
 
 onMounted(async () => {
   try {
@@ -35,6 +39,14 @@ onMounted(async () => {
 
 const handleSecretCreated = async () => {
   secrets.value = await secretStore.fetchSecretsByVaultId(vaultId)
+}
+
+const openAddSecret = () => {
+  if (!authStore.hasMasterKey) {
+    isMasterKeyModalOpen.value = true
+    return
+  }
+  isSecretModalOpen.value = true
 }
 </script>
 
@@ -63,7 +75,7 @@ const handleSecretCreated = async () => {
       </div>
 
       <button 
-        @click="isSecretModalOpen = true"
+        @click="openAddSecret"
         class="button-primary flex items-center space-x-2 px-6 py-2.5 h-fit"
       >
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
@@ -92,6 +104,7 @@ const handleSecretCreated = async () => {
         v-for="secret in secrets" 
         :key="secret.id" 
         :secret="secret" 
+        @request-master-key="isMasterKeyModalOpen = true"
       />
     </div>
 
@@ -100,6 +113,11 @@ const handleSecretCreated = async () => {
       :preselected-vault-id="vaultId"
       @close="isSecretModalOpen = false" 
       @created="handleSecretCreated"
+    />
+
+    <MasterKeyRequiredModal
+      :show="isMasterKeyModalOpen"
+      @close="isMasterKeyModalOpen = false"
     />
   </div>
 </template>

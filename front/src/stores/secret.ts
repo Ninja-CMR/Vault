@@ -17,15 +17,10 @@ export const useSecretStore = defineStore('secret', {
     state: () => ({
         secrets: [] as Secret[],
         loading: false,
-        error: null as string | null,
-        masterPassword: '' // In memory only for the session
+        error: null as string | null
     }),
 
     actions: {
-        setMasterPassword(password: string) {
-            this.masterPassword = password
-        },
-
         async fetchSecretsByVaultId(vaultId: string) {
             this.loading = true
             this.error = null
@@ -63,15 +58,14 @@ export const useSecretStore = defineStore('secret', {
         },
 
         async createSecret(vault_id: string, title: string, type: string, rawValue: any, description?: string) {
-            if (!this.masterPassword) throw new Error('Master password not set')
+            const authStore = useAuthStore()
+            if (!authStore.masterKey) throw new Error('Master key not set')
 
             this.loading = true
             try {
-                const authStore = useAuthStore()
-
                 // Encrypt the JSON value
                 const jsonValue = JSON.stringify(rawValue)
-                const encryptedValue = await encryptData(jsonValue, this.masterPassword, authStore.userEmail || 'static-salt')
+                const encryptedValue = await encryptData(jsonValue, authStore.masterKey, authStore.userEmail || 'static-salt')
 
                 const response = await axios.post(`http://localhost:8000/secrets/vaults/${vault_id}`, {
                     title,
@@ -93,16 +87,16 @@ export const useSecretStore = defineStore('secret', {
         },
 
         async revealSecret(secretId: string) {
-            if (!this.masterPassword) throw new Error('Master password not set')
+            const authStore = useAuthStore()
+            if (!authStore.masterKey) throw new Error('Master key not set')
 
             try {
-                const authStore = useAuthStore()
                 const response = await axios.get(`http://localhost:8000/secrets/${secretId}/reveal`, {
                     headers: { Authorization: `Bearer ${authStore.token}` }
                 })
 
                 const encryptedValue = response.data.encrypted_value
-                const decryptedJson = await decryptData(encryptedValue, this.masterPassword, authStore.userEmail || 'static-salt')
+                const decryptedJson = await decryptData(encryptedValue, authStore.masterKey, authStore.userEmail || 'static-salt')
 
                 return JSON.parse(decryptedJson)
             } catch (err: any) {

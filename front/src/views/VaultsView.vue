@@ -4,12 +4,16 @@ import { useRouter } from 'vue-router'
 import { useVaultStore, type Vault } from '../stores/vault'
 import { useDashboard } from '../composables/useDashboard'
 import { formatDate } from '../utils/format'
+import { useAuthStore } from '../stores/auth'
 import VaultModal from '../components/modals/VaultModal.vue'
+import MasterKeyRequiredModal from '../components/modals/MasterKeyRequiredModal.vue'
 
 const router = useRouter()
 const { vaults, fetchDashboardData, isLoading } = useDashboard()
 const vaultStore = useVaultStore()
+const authStore = useAuthStore()
 const isVaultModalOpen = ref(false)
+const isMasterKeyModalOpen = ref(false)
 const selectedVault = ref<Vault | null>(null)
 const activeDropdown = ref<string | null>(null)
 const searchQuery = ref('')
@@ -19,6 +23,10 @@ onMounted(async () => {
 })
 
 const handleEdit = (vault: Vault) => {
+  if (!authStore.hasMasterKey) {
+    isMasterKeyModalOpen.value = true
+    return
+  }
   selectedVault.value = vault
   isVaultModalOpen.value = true
   activeDropdown.value = null
@@ -32,6 +40,10 @@ const handleDelete = async (vault: Vault) => {
 }
 
 const openCreateModal = () => {
+  if (!authStore.hasMasterKey) {
+    isMasterKeyModalOpen.value = true
+    return
+  }
   selectedVault.value = null
   isVaultModalOpen.value = true
 }
@@ -144,6 +156,11 @@ const filteredVaults = ref(vaults) // Simplified for now, can add reactive filte
       :is-open="isVaultModalOpen" 
       :vault="selectedVault"
       @close="isVaultModalOpen = false" 
+    />
+    
+    <MasterKeyRequiredModal
+      :show="isMasterKeyModalOpen"
+      @close="isMasterKeyModalOpen = false"
     />
   </div>
 </template>

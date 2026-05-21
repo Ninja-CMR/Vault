@@ -3,17 +3,37 @@ import { ref, onMounted, computed } from 'vue'
 import { useDashboard } from '../composables/useDashboard'
 import { useVaultStore } from '../stores/vault'
 import { useSecretStore } from '../stores/secret'
+import { useAuthStore } from '../stores/auth'
 import VaultModal from '../components/modals/VaultModal.vue'
 import SecretModal from '../components/modals/SecretModal.vue'
+import MasterKeyRequiredModal from '../components/modals/MasterKeyRequiredModal.vue'
 import SecretListItem from '../components/SecretListItem.vue'
 
+const authStore = useAuthStore()
 const { stats, fetchDashboardData } = useDashboard()
 const vaultStore = useVaultStore()
 const secretStore = useSecretStore()
 const isVaultModalOpen = ref(false)
 const isSecretModalOpen = ref(false)
+const isMasterKeyModalOpen = ref(false)
 
 const recentSecrets = computed(() => secretStore.secrets.slice(0, 4))
+
+const openAddSecret = () => {
+  if (!authStore.hasMasterKey) {
+    isMasterKeyModalOpen.value = true
+    return
+  }
+  isSecretModalOpen.value = true
+}
+
+const openCreateVault = () => {
+  if (!authStore.hasMasterKey) {
+    isMasterKeyModalOpen.value = true
+    return
+  }
+  isVaultModalOpen.value = true
+}
 
 onMounted(async () => {
   console.log('Dashboard mounting...')
@@ -44,14 +64,14 @@ onMounted(async () => {
         </div>
         <div class="flex items-center space-x-3">
            <button 
-             @click="isSecretModalOpen = true"
+             @click="openAddSecret"
              class="button-secondary text-[13px] py-2 px-5 flex items-center space-x-2"
            >
              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
              <span>Add Secret</span>
            </button>
            <button 
-             @click="isVaultModalOpen = true"
+             @click="openCreateVault"
              class="button-primary text-[13px] py-2 px-5 flex items-center space-x-2"
            >
              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
@@ -121,6 +141,7 @@ onMounted(async () => {
           v-for="secret in recentSecrets" 
           :key="secret.id" 
           :secret="secret" 
+          @request-master-key="isMasterKeyModalOpen = true"
         />
       </div>
         
