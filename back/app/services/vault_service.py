@@ -46,6 +46,35 @@ class VaultService:
         ).first()
 
     @staticmethod
+    def get_vault(db: Session, user: User, vault_id: str):
+        return db.query(Vault).filter(Vault.id == vault_id, Vault.user_id == user.id).first()
+
+    @staticmethod
+    def update_vault(db: Session, user: User, vault_id: str, vault_data: CreateVaultSchema) -> Optional[Vault]:
+        vault = VaultService.get_vault(db, user, vault_id)
+        if not vault:
+            return None
+        
+        # Vérifier l'unicité si le nom change
+        if vault_data.name != vault.name:
+            existing_vault = db.query(Vault).filter(
+                Vault.user_id == user.id,
+                Vault.name == vault_data.name
+            ).first()
+            if existing_vault:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Un coffre nommé '{vault_data.name}' existe déjà."
+                )
+        
+        vault.name = vault_data.name
+        vault.description = vault_data.description
+        
+        db.commit()
+        db.refresh(vault)
+        return vault
+
+    @staticmethod
     def delete_vault(db: Session, user: User, vault_id: str) -> bool:
         vault = VaultService.get_vault(db, user, vault_id)
         if not vault:

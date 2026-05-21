@@ -30,6 +30,11 @@ const router = createRouter({
                     component: () => import('../views/VaultsView.vue')
                 },
                 {
+                    path: 'vaults/:id',
+                    name: 'vault-details',
+                    component: () => import('../views/VaultDetailsView.vue')
+                },
+                {
                     path: 'generator',
                     name: 'generator',
                     component: () => import('../views/DashboardHome.vue')

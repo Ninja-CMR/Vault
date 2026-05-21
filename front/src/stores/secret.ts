@@ -26,16 +26,18 @@ export const useSecretStore = defineStore('secret', {
             this.masterPassword = password
         },
 
-        async fetchVaultSecrets(vaultId: string) {
+        async fetchSecretsByVaultId(vaultId: string) {
             this.loading = true
+            this.error = null
             try {
                 const authStore = useAuthStore()
                 const response = await axios.get(`http://localhost:8000/secrets/vaults/${vaultId}`, {
                     headers: { Authorization: `Bearer ${authStore.token}` }
                 })
-                this.secrets = response.data
+                return response.data
             } catch (err: any) {
-                this.error = 'Failed to fetch secrets'
+                this.error = 'Failed to fetch vault secrets'
+                throw err
             } finally {
                 this.loading = false
             }
@@ -69,7 +71,7 @@ export const useSecretStore = defineStore('secret', {
 
                 // Encrypt the JSON value
                 const jsonValue = JSON.stringify(rawValue)
-                const encryptedValue = await encryptData(jsonValue, this.masterPassword, authStore.user?.email || 'static-salt')
+                const encryptedValue = await encryptData(jsonValue, this.masterPassword, authStore.userEmail || 'static-salt')
 
                 const response = await axios.post(`http://localhost:8000/secrets/vaults/${vault_id}`, {
                     title,
@@ -100,7 +102,7 @@ export const useSecretStore = defineStore('secret', {
                 })
 
                 const encryptedValue = response.data.encrypted_value
-                const decryptedJson = await decryptData(encryptedValue, this.masterPassword, authStore.user?.email || 'static-salt')
+                const decryptedJson = await decryptData(encryptedValue, this.masterPassword, authStore.userEmail || 'static-salt')
 
                 return JSON.parse(decryptedJson)
             } catch (err: any) {

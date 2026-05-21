@@ -1,14 +1,15 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useSecretStore } from '../../stores/secret'
 import { useVaultStore } from '../../stores/vault'
 import { useDashboard } from '../../composables/useDashboard'
 
 const props = defineProps<{
   isOpen: boolean
+  preselectedVaultId?: string
 }>()
 
-const emit = defineEmits(['close'])
+const emit = defineEmits(['close', 'created'])
 
 const secretStore = useSecretStore()
 const vaultStore = useVaultStore()
@@ -18,6 +19,16 @@ const title = ref('')
 const type = ref<'LOGIN' | 'API_KEY' | 'TOKEN' | 'NOTE'>('LOGIN')
 const description = ref('')
 const selectedVaultId = ref('')
+
+watch(() => props.isOpen, (isOpen) => {
+  if (isOpen) {
+    if (props.preselectedVaultId) {
+      selectedVaultId.value = props.preselectedVaultId
+    } else if (vaultStore.vaults.length > 0) {
+      selectedVaultId.value = vaultStore.vaults[0].id
+    }
+  }
+})
 
 // Secret fields based on type
 const fields = ref({

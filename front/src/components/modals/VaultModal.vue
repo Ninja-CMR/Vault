@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useVaultStore } from '../../stores/vault'
+import { ref, watch } from 'vue'
+import { useVaultStore, type Vault } from '../../stores/vault'
 import { useDashboard } from '../../composables/useDashboard'
 
 const props = defineProps<{
   isOpen: boolean
+  vault?: Vault | null
 }>()
 
 const emit = defineEmits(['close'])
@@ -14,6 +15,16 @@ const { fetchDashboardData } = useDashboard()
 const name = ref('')
 const description = ref('')
 const isSubmitting = ref(false)
+
+watch(() => props.vault, (newVault) => {
+  if (newVault) {
+    name.value = newVault.name
+    description.value = newVault.description || ''
+  } else {
+    name.value = ''
+    description.value = ''
+  }
+}, { immediate: true })
 
 const handleClose = () => {
   name.value = ''
@@ -26,7 +37,11 @@ const handleSubmit = async () => {
   
   isSubmitting.value = true
   try {
-    await vaultStore.createVault(name.value, description.value)
+    if (props.vault) {
+      await vaultStore.updateVault(props.vault.id, name.value, description.value)
+    } else {
+      await vaultStore.createVault(name.value, description.value)
+    }
     await fetchDashboardData()
     handleClose()
   } catch (error) {
@@ -58,8 +73,8 @@ const handleSubmit = async () => {
 
         <div class="p-8 space-y-6">
           <div class="space-y-2">
-            <h3 class="text-2xl font-bold tracking-tight text-white">New Vault</h3>
-            <p class="text-zinc-500 text-sm">Create a container to organize your secrets.</p>
+            <h3 class="text-2xl font-bold tracking-tight text-white">{{ props.vault ? 'Edit Vault' : 'New Vault' }}</h3>
+            <p class="text-zinc-500 text-sm">{{ props.vault ? 'Update your container details.' : 'Create a container to organize your secrets.' }}</p>
           </div>
 
           <form @submit.prevent="handleSubmit" class="space-y-5">
@@ -90,7 +105,7 @@ const handleSubmit = async () => {
                 class="button-primary w-full py-2.5 text-[14px] font-semibold"
                 :disabled="!name || isSubmitting"
               >
-                {{ isSubmitting ? 'Creating...' : 'Create Vault' }}
+                {{ isSubmitting ? (props.vault ? 'Updating...' : 'Creating...') : (props.vault ? 'Save Changes' : 'Create Vault') }}
               </button>
             </div>
           </form>

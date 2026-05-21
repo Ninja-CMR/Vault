@@ -31,7 +31,6 @@ def list_vaults(
     Lister les coffres de l'utilisateur connecté.
     """
     return VaultService.get_user_vaults(db, current_user)
-
 @router.get("/{vault_id}", response_model=VaultResponseSchema)
 def get_vault(
     vault_id: str,
@@ -39,9 +38,27 @@ def get_vault(
     db: Session = Depends(get_db)
 ):
     """
-    Obtenir un coffre spécifique de l'utilisateur connecté.
+    Obtenir les détails d'un coffre spécifique.
     """
     vault = VaultService.get_vault(db, current_user, vault_id)
+    if not vault:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Coffre introuvable"
+        )
+    return vault
+
+@router.put("/{vault_id}", response_model=VaultResponseSchema)
+def update_vault(
+    vault_id: str,
+    vault_data: CreateVaultSchema,
+    current_user: CurrentUserDep,
+    db: Session = Depends(get_db)
+):
+    """
+    Mettre à jour un coffre existant.
+    """
+    vault = VaultService.update_vault(db, current_user, vault_id, vault_data)
     if not vault:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
