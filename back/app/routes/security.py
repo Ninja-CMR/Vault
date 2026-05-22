@@ -8,6 +8,7 @@ from app.schemas.security import (
     UnlockMasterKeySchema
 )
 from app.services.security_service import MasterKeyService
+from app.services.activity_service import ActivityLoggerService
 from app.core.security import CurrentUserDep
 
 router = APIRouter(
@@ -27,6 +28,10 @@ def generate_master_key(
     db_mk, mk, pt = MasterKeyService.create_master_key(
         db, current_user.id, data.password, force_regenerate=data.force_regenerate
     )
+    ActivityLoggerService.log_event(
+        db, str(current_user.id), "master_key_generated", 
+        status="success", metadata={"public_token": pt}
+    )
     return {"master_key": mk, "public_token": pt, "created_at": db_mk.created_at}
 
 @router.post("/master-key/unlock", response_model=MasterKeyResponseSchema)
@@ -40,6 +45,10 @@ def unlock_master_key(
     """
     mk, pt = MasterKeyService.unlock_master_key(db, current_user.id, data.password)
     db_mk = MasterKeyService.get_user_master_key_status(db, current_user.id)
+    ActivityLoggerService.log_event(
+        db, str(current_user.id), "master_key_unlocked", 
+        status="success", metadata={"public_token": pt}
+    )
     return {"master_key": mk, "public_token": pt, "created_at": db_mk.created_at}
 
 @router.get("/master-key/status", response_model=MasterKeyStatusSchema)

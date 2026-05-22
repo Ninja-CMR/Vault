@@ -4,6 +4,7 @@ from typing import List
 from app.database.database import get_db
 from app.schemas.secret import CreateSecretSchema, SecretResponseSchema, RevealSecretSchema
 from app.services.secret_service import SecretService
+from app.services.activity_service import ActivityLoggerService
 from app.core.security import CurrentUserDep
 
 router = APIRouter(
@@ -44,6 +45,12 @@ def reveal_secret(
     secret = SecretService.get_secret_metadata(db, current_user, secret_id)
     encrypted_val = SecretService.reveal_secret(db, current_user, secret_id)
     
+    ActivityLoggerService.log_event(
+        db, str(current_user.id), "secret_revealed", 
+        resource_type="secret", resource_id=secret_id,
+        metadata={"title": secret.title}
+    )
+    
     return {
         "id": secret.id,
         "title": secret.title,
@@ -66,6 +73,10 @@ def delete_secret(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Secret introuvable"
         )
+    ActivityLoggerService.log_event(
+        db, str(current_user.id), "secret_deleted", 
+        resource_type="secret", resource_id=secret_id
+    )
     return None
 
 # Vault-related secret routes (moved here or kept absolute)
@@ -79,7 +90,13 @@ def create_secret(
     """
     Ajouter un secret dans un coffre spécifié.
     """
-    return SecretService.create_secret(db, current_user, vault_id, secret_data)
+    secret = SecretService.create_secret(db, current_user, vault_id, secret_data)
+    ActivityLoggerService.log_event(
+        db, str(current_user.id), "secret_created", 
+        resource_type="secret", resource_id=str(secret.id),
+        metadata={"title": secret.title, "vault_id": vault_id}
+    )
+    return secret
 
 @router.get("/vaults/{vault_id}", response_model=List[SecretResponseSchema])
 def list_vault_secrets(

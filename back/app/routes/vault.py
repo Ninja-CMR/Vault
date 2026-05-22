@@ -4,6 +4,7 @@ from typing import List
 from app.database.database import get_db
 from app.schemas.vault import CreateVaultSchema, VaultResponseSchema
 from app.services.vault_service import VaultService
+from app.services.activity_service import ActivityLoggerService
 from app.core.security import CurrentUserDep
 
 router = APIRouter(
@@ -20,7 +21,13 @@ def create_vault(
     """
     Créer un nouveau coffre pour l'utilisateur authentifié.
     """
-    return VaultService.create_vault(db, current_user, vault_data)
+    vault = VaultService.create_vault(db, current_user, vault_data)
+    ActivityLoggerService.log_event(
+        db, str(current_user.id), "vault_created", 
+        resource_type="vault", resource_id=str(vault.id),
+        metadata={"name": vault.name}
+    )
+    return vault
 
 @router.get("", response_model=List[VaultResponseSchema])
 def list_vaults(
@@ -64,6 +71,11 @@ def update_vault(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Coffre introuvable"
         )
+    ActivityLoggerService.log_event(
+        db, str(current_user.id), "vault_updated", 
+        resource_type="vault", resource_id=str(vault.id),
+        metadata={"name": vault.name}
+    )
     return vault
 
 @router.delete("/{vault_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -81,4 +93,8 @@ def delete_vault(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Coffre introuvable"
         )
+    ActivityLoggerService.log_event(
+        db, str(current_user.id), "vault_deleted", 
+        resource_type="vault", resource_id=vault_id
+    )
     return None

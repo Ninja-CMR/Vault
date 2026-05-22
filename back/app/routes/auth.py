@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from app.database.database import get_db
 from app.schemas.user import CreateUserSchema, UserResponseSchema, LoginSchema, TokenSchema
 from app.services.auth_service import UserCreationService
+from app.services.activity_service import ActivityLoggerService
 from app.core.security import create_access_token
 
 router = APIRouter(
@@ -16,6 +17,7 @@ def register(user_data: CreateUserSchema, db: Session = Depends(get_db)):
     Créer un nouveau compte utilisateur Vault.
     """
     new_user = UserCreationService.create_user(db, user_data)
+    ActivityLoggerService.log_event(db, str(new_user.id), "user_registration", status="success")
     return new_user
 
 @router.post("/login", response_model=TokenSchema)
@@ -32,4 +34,5 @@ def login(login_data: LoginSchema, db: Session = Depends(get_db)):
         )
     
     access_token = create_access_token(data={"sub": user.email})
+    ActivityLoggerService.log_event(db, str(user.id), "user_login", status="success")
     return {"access_token": access_token, "token_type": "bearer"}

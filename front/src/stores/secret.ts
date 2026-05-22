@@ -91,15 +91,27 @@ export const useSecretStore = defineStore('secret', {
             if (!authStore.masterKey) throw new Error('Master key not set')
 
             try {
+                console.log(`[SecretStore] Revealing secret ${secretId}...`)
                 const response = await axios.get(`http://localhost:8000/secrets/${secretId}/reveal`, {
                     headers: { Authorization: `Bearer ${authStore.token}` }
                 })
 
+                console.log(`[SecretStore] Encrypted data received, attempting decryption...`)
                 const encryptedValue = response.data.encrypted_value
-                const decryptedJson = await decryptData(encryptedValue, authStore.masterKey, authStore.userEmail || 'static-salt')
+
+                // Debugging salt
+                const salt = authStore.userEmail || 'static-salt'
+                console.log(`[SecretStore] Using salt: ${salt}`)
+
+                const decryptedJson = await decryptData(encryptedValue, authStore.masterKey, salt)
+                console.log(`[SecretStore] Decryption successful. Parsing JSON...`)
 
                 return JSON.parse(decryptedJson)
             } catch (err: any) {
+                console.error('[SecretStore] Reveal failed:', err)
+                if (err.message.includes('Déchiffrement échoué')) {
+                    throw err // Preserve the detailed decryption error message
+                }
                 throw new Error('Failed to reveal secret')
             }
         }

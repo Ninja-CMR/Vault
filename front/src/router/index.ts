@@ -47,7 +47,7 @@ const router = createRouter({
                 {
                     path: 'logs',
                     name: 'logs',
-                    component: () => import('../views/DashboardHome.vue')
+                    component: () => import('../views/ActivityHistoryView.vue')
                 },
                 {
                     path: 'settings',
