@@ -52,7 +52,7 @@ const router = createRouter({
                 {
                     path: 'settings',
                     name: 'settings',
-                    component: () => import('../views/DashboardHome.vue')
+                    component: () => import('../views/SettingsView.vue')
                 }
             ]
         },
