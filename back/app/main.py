@@ -25,15 +25,10 @@ async def startup_event():
     
     asyncio.create_task(flush_logs_periodically())
 
-# Configuration CORS
-origins = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-]
-
+# Configuration CORS - Permissive pour le développement
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origin_regex=".*",  # Autorise toutes les origines
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
